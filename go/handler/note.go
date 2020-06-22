@@ -87,11 +87,11 @@ func (nh *noteHandler) CreateNote(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// validation
-	if req.Title == "" || req.Body == "" || req.Author == "" {
-		log.Printf("bad request: request body have empty values")
-		response.BadRequest(w, "request body has empty values")
-		return
-	}
+	// if req.Title == "" || req.Body == "" || req.Author == "" {
+	// 	log.Printf("bad request: request body have empty values")
+	// 	response.BadRequest(w, "request body has empty values")
+	// 	return
+	// }
 
 	// create datas
 	id, err := utility.GenerateID()

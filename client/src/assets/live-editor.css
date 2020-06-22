@@ -1,0 +1,46 @@
+html {
+
+}
+
+body {
+  margin: 0;
+}
+
+.live-editor {
+  margin: 10px;
+}
+
+.live-editor .body {
+  display: flex;
+
+}
+
+.editor {
+  width: 50%;
+}
+
+.live-editor input {
+  font-size: 14px;
+  padding: 3px 5px;
+}
+
+.editor textarea {
+  font-size: 14px;
+  resize: none;
+  width: 100%;
+  height: 500px;
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.editor textarea:focus {
+  outline: none;
+}
+
+.preview {
+  background-color: #ccc;
+  height: 500px;
+  width: 50%;
+  box-sizing: border-box;
+  padding: 10px 20px;
+}

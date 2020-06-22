@@ -19,6 +19,7 @@ type noteHandler struct {
 
 type NoteHandler interface {
 	GetAllNotes(w http.ResponseWriter, r *http.Request)
+	GetNoteByID(w http.ResponseWriter, r *http.Request)
 	CreateNote(w http.ResponseWriter, r *http.Request)
 	UpdateNote(w http.ResponseWriter, r *http.Request)
 	DeleteNote(w http.ResponseWriter, r *http.Request)
@@ -30,6 +31,27 @@ func NewNoteHandler(db *sql.DB) NoteHandler {
 	}
 }
 
+func (nh *noteHandler) GetNoteByID(w http.ResponseWriter, r *http.Request) {
+	id := strings.Split(r.URL.Path, "/")[2]
+	row := nh.DB.QueryRow(`
+		SELECT id, title, body, author, created_at, updated_at
+		FROM notes
+		WHERE id=?
+	`, id)
+	var note domain.Note
+	if err := row.Scan(&note.ID, &note.Title, &note.Body, &note.Author, &note.CreatedAt, &note.UpdatedAt); err != nil {
+		if err == sql.ErrNoRows {
+			response.Success(w, note)
+			return
+		}
+		log.Printf("failed to select db: %v", err)
+		response.InternalServerError(w, err.Error())
+		return
+	}
+	response.Success(w, convertToNoteResponse(&note))
+	return
+}
+
 func (nh *noteHandler) GetAllNotes(w http.ResponseWriter, r *http.Request) {
 	rows, err := nh.DB.Query("SELECT id, title, body, author, created_at, updated_at FROM notes")
 	var notes NotesResponse
@@ -37,7 +59,7 @@ func (nh *noteHandler) GetAllNotes(w http.ResponseWriter, r *http.Request) {
 		var note domain.Note
 		if err = rows.Scan(&note.ID, &note.Title, &note.Body, &note.Author, &note.CreatedAt, &note.UpdatedAt); err != nil {
 			if err == sql.ErrNoRows {
-				break
+				continue
 			}
 			log.Printf("db scan error: %v", err)
 			response.InternalServerError(w, err.Error())
@@ -179,7 +201,7 @@ type NotesResponse struct {
 type NoteResponse struct {
 	ID        string `json:"id"`
 	Title     string `json:"title"`
-	Body      string `json:"body`
+	Body      string `json:"body"`
 	Author    string `json:"author"`
 	CreatedAt string `json:"createdAt"`
 	UpdatedAt string `json:"updatedAt"`

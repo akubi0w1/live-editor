@@ -13,18 +13,16 @@ const getNoteByID = async (id) => {
   return result.data
 }
 
-const updateNote = ({id, data}) => {
+const updateNote = async ({id, data, setMessage}) => {
   // TODO: ここrxjsのajaxでいい気がしてきた
   // TODO: api call. PUT /notes/:id
-  // console.log(id, data)
-  // console.log("title: ")
-  var result = axios.put(`http://localhost:8080/notes/${id}`, data)
-  console.log("auto save.")
+  var result = await axios.put(`http://localhost:8080/notes/${id}`, data)
   let obj = {
     title: data.title,
     author: data.author,
     body: data.body
   }
+  setMessage(`auto save: ${result.data.updatedAt}`)
   return of(obj)
 }
 
@@ -34,7 +32,7 @@ let autoSaveSubject = new Subject()
 // これをsubscribeすると、autoUpdateの結果を参照することができる。
 // ちな、結果はjsonオブジェクトで帰ってくる
 let autoSaveObservable = autoSaveSubject.pipe(
-  debounceTime(2000), // since stop typing
+  debounceTime(1000), // since stop typing
   distinctUntilChanged(),
   mergeMap(val => from(updateNote(val)))
 )
@@ -48,6 +46,7 @@ const useObservable = (observable, setter) => {
 
 const LiveEditor = (props) => {
   const [init, setInit] = useState(false);
+  const [message, setMessage] = useState('no message');
   const [formValue, setFormValue] = useState({
     title: '',
     author: '',
@@ -55,10 +54,7 @@ const LiveEditor = (props) => {
   })
   // let fetchObservable = from(getNoteByID(props.id))
   useEffect(() => {
-    // create 
-    console.log(props.id)
-
-    // update...
+    // 初期化
     let subscription = from(getNoteByID(props.id))
       .subscribe(result => {
         if (typeof result !== "undefined") {
@@ -77,55 +73,44 @@ const LiveEditor = (props) => {
   // useObservable(fetchObservable, set)
   useObservable(autoSaveObservable, setResult)
 
-  const handleTitleChange = e => {
+  const handleChange = e => {
     setFormValue({
       ...formValue,
-      title: e.target.value
+      [e.target.name]: e.target.value
     })
-    autoSaveSubject.next({id: props.id, data: formValue})
-  }
-
-  const handleAuthorChange = e => {
-    setFormValue({
-      ...formValue,
-      author: e.target.value
-    })
-    autoSaveSubject.next({id: props.id, data: formValue})
-  }
-
-  const handleBodyChange = e => {
-    setFormValue({
-      ...formValue,
-      body: e.target.value
-    })
-    autoSaveSubject.next({id: props.id, data: formValue})
+    autoSaveSubject.next({ id: props.id, data: formValue, setMessage: setMessage })
   }
 
   const handleFormSubmit = e => {
     e.preventDefault()
-    updateNote({ id: props.id, data: formValue })
+    updateNote({ id: props.id, data: formValue, setMessage: setMessage })
   }
 
   return (
     <form onSubmit={handleFormSubmit}>
-      <div class="live-editor">
-        <div>
-          <Link to="/">back</Link>
-          <button type="submit">save</button>
+      <div className="live-editor">
+        <div className="notify" style={{marginBottom: "10px"}}>{message}</div>
+        <div style={{margin: "10px"}}>
+          <Link to="/" className="btn btn-secondary">back</Link>
+          <button type="submit" className="btn btn-primary ml-10">save</button>
         </div>
         {/* END buttons */}
-        <div>
-          <div>
-            <input type="text" placeholder="title" value={formValue.title} onChange={handleTitleChange} size="40" />
-          </div>
-          <div>
-            <input type="text" placeholder="author" value={formValue.author} onChange={handleAuthorChange} size="40" />
-          </div>
-        </div>
+        <table>
+          <tbody>
+            <tr>
+              <td><label>Title</label></td>
+              <td><input type="text" name="title" placeholder="title" value={formValue.title} onChange={handleChange} size="40" /></td>
+            </tr>
+            <tr>
+              <td><label>Author</label></td>
+              <td><input type="text" name="author" placeholder="author" value={formValue.author} onChange={handleChange} size="40" /></td>
+            </tr>
+          </tbody>
+        </table>
         {/* END title and author */}
         <div class="body">
           <div class="editor">
-            <textarea onChange={handleBodyChange} value={formValue.body}></textarea>
+            <textarea name="body" onChange={handleChange} value={formValue.body}></textarea>
           </div>
 
           <div class="preview">

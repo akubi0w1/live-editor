@@ -6,6 +6,51 @@ body {
   margin: 0;
 }
 
+/* parts */
+.btn {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 5px;
+  text-decoration: none;
+}
+
+.btn:hover {
+  opacity: .8;
+}
+
+.btn-primary {
+  background-color: #0FA3B1;
+  color: white;
+  border-color: #0FA3B1;
+}
+
+.btn-secondary {
+  background-color: #9398A1;
+  color: white;
+  border-color: #9398A1;
+}
+
+.notify {
+  background-color: #9EE2E5;
+  color: black;
+  padding: 5px 20px;
+  font-weight: 600;
+  /* width: 100px; */
+}
+
+.ml-10 {
+  margin-left: 10px;
+}
+
+.mr-10 {
+  margin-right: 10px;
+}
+
+.mb-10 {
+  margin-bottom: 10px;
+}
+
 .live-editor {
   margin: 10px;
 }
@@ -43,4 +88,13 @@ body {
   width: 50%;
   box-sizing: border-box;
   padding: 10px 20px;
+}
+
+.notes-list .note-link {
+  color: #0C8793;
+  text-decoration: none;
+}
+
+.notes-list .note-link:hover {
+  text-decoration: underline;
 }
